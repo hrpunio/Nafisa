@@ -1,0 +1,135 @@
+
+R version 3.5.2 (2018-12-20) -- "Eggshell Igloo"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: arm-unknown-linux-gnueabihf (32-bit)
+
+R jest oprogramowaniem darmowym i dostarczany jest BEZ JAKIEJKOLWIEK GWARANCJI.
+Możesz go rozpowszechniać pod pewnymi warunkami.
+Wpisz 'license()' lub 'licence()' aby uzyskać szczegóły dystrybucji.
+
+R jest projektem kolaboracyjnym z wieloma uczestnikami.
+Wpisz 'contributors()' aby uzyskać więcej informacji oraz
+'citation()' aby dowiedzieć się jak cytować R lub pakiety R w publikacjach.
+
+Wpisz 'demo()' aby zobaczyć demo, 'help()' aby uzyskać pomoc on-line, lub
+'help.start()' aby uzyskać pomoc w przeglądarce HTML.
+Wpisz 'q()' aby wyjść z R.
+
+[Poprzednio zapisany obszar roboczy został przywrócony]
+
+> library("dplyr")
+
+Dołączanie pakietu: ‘dplyr’
+
+Następujące obiekty zostały zakryte z ‘package:stats’:
+
+    filter, lag
+
+Następujące obiekty zostały zakryte z ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> library("ggplot2")
+> library("ggpubr")
+Ładowanie wymaganego pakietu: magrittr
+> ##
+> surl <- "https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide"
+> today <- Sys.Date()
+> tt<- format(today, "%d/%m/%Y")
+> 
+> d <- read.csv("covid19_C.csv", sep = ';',  header=T, na.string="NA");
+> 
+> d <- d %>% filter(as.Date(date, format="%Y-%m-%d") > "2020-02-15") %>% as.data.frame
+> 
+> ##
+> c1 <- c('IT', 'DE', 'ES', 'UK', 'FR', 'DK', 'SE')
+> # date;id;country;newc;newd;totalc;totald
+> d1 <- d %>% filter (id %in% c1) %>% as.data.frame
+> t1 <- d1 %>% group_by(id) %>%  summarise(cc = sum(newc, na.rm=T), dd=sum(newd, na.rm=T))
+> t1
+# A tibble: 7 x 3
+  id       cc    dd
+  <fct> <int> <int>
+1 DE     3780     8
+2 DK      827     0
+3 ES     5751   136
+4 FR     4488    90
+5 IT    17747  1441
+6 SE      923     1
+7 UK     1131    21
+> lab1c <- toString(paste (sep=" = ", t1$id, t1$cc))
+> lab1d <- toString(paste (sep=" = ", t1$id, t1$dd))
+> #lab1
+> str(d1)
+'data.frame':	203 obs. of  7 variables:
+ $ date   : Factor w/ 76 levels "2019-12-31","2020-01-01",..: 48 48 48 48 48 48 48 49 49 49 ...
+ $ id     : Factor w/ 134 levels "AD","AE","AF",..: 34 35 42 45 63 112 127 34 35 42 ...
+ $ country: Factor w/ 135 levels "Afghanistan",..: 47 36 116 44 63 121 131 47 36 116 ...
+ $ newc   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ newd   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ totalc : int  15 NA 2 11 3 1 9 15 NA 2 ...
+ $ totald : int  0 NA 0 1 0 0 0 0 NA 0 ...
+> pc1 <- ggplot(d1, aes(x= as.Date(date, format="%Y-%m-%d"), y=newc)) + geom_line(aes(group = id, color = id), size=.8) +
++  xlab(label="") +
++  ##annotate("text", x=as.Date("2020-02-12", format="%Y-%m-%d")), y=-20, label=surl, size=3, color="black", hjust = 0) +
++  theme(plot.subtitle=element_text(size=8, hjust=0, color="black")) +
++  ggtitle(sprintf("COVID19: new confirmed cases (%s)", tt), subtitle=sprintf("Total: %s\n%s", lab1c, surl)) 
+> 
+> pd1 <- ggplot(d1, aes(x= as.Date(date, format="%Y-%m-%d"), y=newd)) + geom_line(aes(group = id, color = id), size=.8) +
++  xlab(label="") +
++  theme(plot.subtitle=element_text(size=8, hjust=0, color="black")) +
++  ggtitle(sprintf ("COVID19: deaths (%s)", tt), subtitle=sprintf("Total: %s\n%s", lab1d, surl))
+> 
+> ##
+> c2 <- c('PL', 'CZ', 'SK', 'HU', 'RO', 'BG', 'EL')
+> d2 <- d %>% filter (id %in% c2) %>% as.data.frame
+> t2 <- d2 %>% group_by(id) %>%  summarise(cc = sum(newc, na.rm=T), dd=sum(newd, na.rm=T))
+> str(d2)
+'data.frame':	203 obs. of  7 variables:
+ $ date   : Factor w/ 76 levels "2019-12-31","2020-01-01",..: 48 48 48 48 48 48 48 49 49 49 ...
+ $ id     : Factor w/ 134 levels "AD","AE","AF",..: 15 33 41 55 100 105 115 15 33 41 ...
+ $ country: Factor w/ 135 levels "Afghanistan",..: 20 34 49 55 98 101 112 20 34 49 ...
+ $ newc   : int  NA 0 0 NA NA 0 NA NA 0 0 ...
+ $ newd   : int  NA 0 0 NA NA 0 NA NA 0 0 ...
+ $ totalc : int  NA NA NA NA NA NA NA NA NA NA ...
+ $ totald : int  NA NA NA NA NA NA NA NA NA NA ...
+> t2
+# A tibble: 7 x 3
+  id       cc    dd
+  <fct> <int> <int>
+1 BG       41     2
+2 CZ      214     0
+3 EL      228     3
+4 HU       31     0
+5 PL      104     3
+6 RO      113     0
+7 SK       44     0
+> lab2c <- toString(paste (sep=" = ", t2$id, t2$cc))
+> lab2d <- toString(paste (sep=" = ", t2$id, t2$dd))
+> ##d2
+> ##
+> pc2 <- ggplot(d2, aes(x= as.Date(date, format="%Y-%m-%d"), y=newc)) + geom_line(aes(group = id, color = id), size=.8) +
++  ##annotate("text", x=as.Date("2020-02-12"), y=100, label=surl, size=3, color="black", hjust = 0) +
++  theme(plot.subtitle=element_text(size=8, hjust=0, color="black")) +
++  xlab(label="") +
++  ggtitle(sprintf("COVID19: new confirmed cases (%s)", tt), subtitle=sprintf("Total: %s\n%s", lab2c, surl)) 
+> 
+> pd2 <- ggplot(d2, aes(x= as.Date(date, format="%Y-%m-%d"), y=newd)) + geom_line(aes(group = id, color = id), size=.8) +
++  theme(plot.subtitle=element_text(size=8, hjust=0, color="black")) +
++  xlab(label="") +
++  scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8,9)) +
++  ggtitle(sprintf ("COVID19: deaths (%s)", tt), subtitle=sprintf("Total: %s\n%s", lab2d, surl))
+> 
+> p1 <- ggarrange(pc1,pd1, ncol=2, nrow=1)
+> p2 <- ggarrange(pc2,pd2, ncol=2, nrow=1)
+Komunikaty ostrzegawcze:
+1: Removed 76 rows containing missing values (geom_path). 
+2: Removed 76 rows containing missing values (geom_path). 
+> ggsave(plot=p1, "Covid19_1.png", width=15)
+Saving 15 x 7 in image
+> ggsave(plot=p2, "Covid19_2.png", width=15)
+Saving 15 x 7 in image
+> 
+> proc.time()
+użytkownik     system   upłynęło 
+    23.604      0.256     23.858 
