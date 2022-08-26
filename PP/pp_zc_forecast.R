@@ -51,7 +51,7 @@ p2c <- d.cum %>% filter (dzienrok <= lday) %>%
   scale_y_continuous(breaks=seq(0, wd.y * 10 + wd.y, by=wd.y)) +
   scale_color_hue(name="rok") +
   ggtitle(sprintf("Wypadki/zabici (skumulowana suma | ostatni dzień roku: %i)", last.y.day), 
-          subtitle="policja.pl/pol/form/1,Informacja-dzienna.html") 
+          subtitle="policja.pl/pol/form/1,Informacja-dzienna.html | github.com/hrpunio/Nafisa/tree/master/PP") 
 
 ggsave(plot=p2c, "PPW_Zabici_Cum.png", width=12, height = 9)
 p2c
@@ -122,7 +122,7 @@ p3c <- ggplot(d.cum.zz, aes(x= dzienrok, y=zc, color=as.factor(rok))) +
   ylab(label='liczba zabitych') +
   scale_y_continuous(breaks=seq(0, wd.y * 10 + wd.y, by=wd.y)) +
   scale_color_hue(name="rok") +
-  labs(caption="Źródło: policja.pl/pol/form/1,Informacja-dzienna.html") +
+  labs(caption="Źródło: policja.pl/pol/form/1,Informacja-dzienna.html | github.com/hrpunio/Nafisa/tree/master/PP") +
   ggtitle(sprintf("Wypadki/zabici (skumulowana suma | ostatni dzień roku %i: %i)", 
                   last_yr,
                   last.y.day), 
